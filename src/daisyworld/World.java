@@ -34,7 +34,7 @@ public class World {
         // TODO: save locally
     }
 
-    public void updatePatch(Patch[][] new_patches, int i, int j) {
+    private void updatePatch(Patch[][] new_patches, int i, int j) {
         Patch new_patch = new_patches[i][j];
 
         new_patch.setTemp(new_patch.calcTemp());

@@ -24,7 +24,7 @@ public class Patch {
         return (temperature + local_heating) / 2;
     }
 
-    public double calcLuminosity() {
+    private double calcLuminosity() {
         return (1 - daisy.getAlbedo()) * Params.SOLAR_LUMINOSITY;
     }
     
