@@ -26,16 +26,24 @@ public class Daisy {
         }
     }
 
-    public void age() {
+    public Daisy(Types type, int age){
+        this(type);
+        this.age = age;
+    }
+
+    public int age() {
         if (type != Types.None) {
             age++;
         }
 
         if (age > Params.MAX_AGE) {
-            type = Types.None;
-            age = 0;
-            albedo = Params.ALBEDO_SURFACE;
+            this.type = Types.None;
+            this.age = 0;
+            this.albedo = Params.ALBEDO_SURFACE;
+            return 1;
         }
+
+        return 0;
     }
     
     @Override
@@ -54,4 +62,6 @@ public class Daisy {
     public boolean hasDaisy(){
         return type != Types.None;
     }
+
+    public Types getType() {return type;}
 }

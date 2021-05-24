@@ -21,7 +21,7 @@ public class Main {
                             "\t'E' for exiting the program. \n");
 
             String s = in.next();
-            char c = s.charAt(0);
+            char c = Character.toUpperCase(s.charAt(0));
             switch (c) {
                 case 'G':
                     world.update();

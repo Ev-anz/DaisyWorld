@@ -16,8 +16,12 @@ public class Params {
 
     public static final double SOLAR_LUMINOSITY = 0.8;
 
-    public static final double MAX_AGE = 25;
+    // Max age of Daisy
 
-    public static final int WORLD_SIZE = 29;
+    public static final double MAX_AGE = 10;
+
+    // World size
+
+    public static final int WORLD_SIZE = 16;
 
 }

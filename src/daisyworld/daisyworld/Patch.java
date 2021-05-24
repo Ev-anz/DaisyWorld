@@ -6,6 +6,7 @@ package daisyworld;
 public class Patch {
     private double temperature;
     private Daisy daisy;
+    private boolean justDied = false;
 
     public Patch() {
         double random = Math.random();
@@ -26,11 +27,21 @@ public class Patch {
         this.daisy = daisy;
     }
 
-    public double calcTemp() {
-        double absorbed_luminosity = calcLuminosity();
-        double local_heating = absorbed_luminosity > 0 ? Math.log(absorbed_luminosity) * 72 + 80 : 80;
+    public Patch(Daisy daisy, double temperature) {
+        this();
+        this.temperature = temperature;
+        this.daisy = new Daisy(daisy.getType());
+    }
 
-        return (temperature + local_heating) / 2;
+    /**
+     *
+     * @return next tick's temperature of current patch
+     */
+    public double calcTemp() {
+        double absorbedLuminosity = calcLuminosity();
+        double localHeating = absorbedLuminosity > 0 ? Math.log(absorbedLuminosity) * 72 + 80 : 80;
+
+        return (temperature + localHeating) / 2;
     }
 
     private double calcLuminosity() {
@@ -48,11 +59,28 @@ public class Patch {
     public Daisy getDaisy() {return daisy;}
 
     public void agedDaisy() {
-        daisy.age();
+        int res = daisy.age();
+        if (res == 1) {
+            // the aged daisy has died due to exceeding max age
+            justDied = true;
+        };
     }
 
-    public void spawnDaisy() {
-        // TODO
+    public void spawnDaisy(Daisy daisy) {
+        setDaisy(daisy);
     }
 
+    /**
+     * update daisy of this patch; avoids shallow copy
+     * @param daisy
+     */
+    public void setDaisy(Daisy daisy) {this.daisy = new Daisy(daisy.getType());}
+
+    public boolean justDied() {
+        return justDied;
+    }
+
+    public void clearJustDied() {
+        justDied = false;
+    }
 }
