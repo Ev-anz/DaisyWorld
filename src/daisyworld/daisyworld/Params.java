@@ -1,3 +1,8 @@
+package daisyworld;
+
+/**
+ * @author Jesse Zhao
+ */
 public class Params {
     public static final double START_PERCENT_WHITES = 0.2;
 

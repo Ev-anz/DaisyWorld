@@ -1,3 +1,8 @@
+package daisyworld;
+
+/**
+ * @author Jesse Zhao
+ */
 public class Patch {
     private double temperature;
     private Daisy daisy;
@@ -5,9 +10,13 @@ public class Patch {
     public Patch() {
         double random = Math.random();
 
-        if (random < Params.START_PERCENT_BLACK) daisy = new Daisy(Types.Black);
-        else if (random > 1 - Params.START_PERCENT_WHITES) daisy = new Daisy(Types.White);
-        else daisy = new Daisy(Types.None);
+        if (random < Params.START_PERCENT_BLACK) {
+            daisy = new Daisy(Types.Black);
+        } else if (random > 1 - Params.START_PERCENT_WHITES) {
+            daisy = new Daisy(Types.White);
+        } else {
+            daisy = new Daisy(Types.None);
+        }
 
         temperature = 15 + 5 * Math.random();
     }

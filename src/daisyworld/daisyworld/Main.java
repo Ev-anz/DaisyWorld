@@ -1,5 +1,10 @@
+package daisyworld;
+
 import java.util.Scanner;
 
+/**
+ * @author Jesse Zhao
+ */
 public class Main {
     /**
      * The main method to start the simulation

@@ -1,3 +1,8 @@
+package daisyworld;
+
+/**
+ * @author Jesse Zhao
+ */
 public class World {
     private int size;
     private Patch[][] patches;
@@ -41,7 +46,9 @@ public class World {
 
         // TODO: diffuse temp
 
-        if (new_patch.hasDaisy()) new_patch.agedDaisy();
+        if (new_patch.hasDaisy()) {
+            new_patch.agedDaisy();
+        }
 
         // TODO: spawn new daisy
     }
