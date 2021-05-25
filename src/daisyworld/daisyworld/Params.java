@@ -1,5 +1,7 @@
 package daisyworld;
 
+import java.security.PublicKey;
+
 /**
  * @author Jesse Zhao
  */
@@ -23,5 +25,19 @@ public class Params {
     // World size
 
     public static final int WORLD_SIZE = 16;
+
+    // Parameters for the extension experiment.
+    // Diffusion Rate
+
+    public static final double DIFFUSION_RATE = 0.5;
+
+    // The switch of the extension of soil quality, True = switch on, False = switch off.
+
+    public static final boolean QUALITY_SWITCH = true;
+
+    // The best value of quality of soil, the common value should fluctuate from 0 to this value.
+    // The average quality of all the patches at the beginning should be 0.5.
+
+    public static final int MAX_QUALITY = 1;
 
 }

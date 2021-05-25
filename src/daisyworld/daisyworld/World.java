@@ -34,6 +34,17 @@ public class World {
         return count;
     }
 
+    // function for getting average soil quality of the extension experiment
+    public double getAvgSoilQuality () {
+        double averageSolQuality = 0.0;
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                averageSolQuality += patches[i][j].getTemp();
+            }
+        }
+        return averageSolQuality / (size * size);
+    }
+
     // TODO: Scenario where luminosity ramps up and down
 
     public World() {
@@ -147,8 +158,11 @@ public class World {
     private void grow(Patch[][] newPatches, int i, int j, int[] coords) {
         if (!newPatches[coords[0]][coords[1]].hasDaisy() && !newPatches[coords[0]][coords[1]].justDied()) {
             double temperature = newPatches[coords[0]][coords[1]].getTemp();
+            double soilQuality = newPatches[coords[0]][coords[1]].getSoilQuality();
             // Probability check: only with temperature higher than 5 degree, 100% success at 22.5 degree
-            double rnd = 0.1457 * temperature - 0.0032 * temperature * temperature - 0.6443;
+            // Extension possibility check: rnd * soil quality, if the extension switch is off,
+            // then soil quality should be 1 and won't affect the result.
+            double rnd = (0.1457 * temperature - 0.0032 * temperature * temperature - 0.6443) * soilQuality;
 
             if (Math.random() < rnd) {
                 // grow new daisy with the same type
@@ -183,26 +197,59 @@ public class World {
         Patch source = patches[i][j];
         int target = -1;
         double diff = 0;
+        double soilQualityDiff = 0.0;
         switch (direction) {
             case UP:
                 target = j == 0 ? size - 1 : j - 1;
-                diff = (source.getTemp() - patches[i][target].getTemp()) / 2;
+                diff = (source.getTemp() - patches[i][target].getTemp()) * Params.DIFFUSION_RATE;
+                // calculation of soil quality difference
+                soilQualityDiff = (source.getSoilQuality() - patches[i][target].getTemp()) * Params.DIFFUSION_RATE;
                 newPatches[i][target].setTemp(newPatches[i][target].getTemp() + diff);
+                // set new patch soil quality
+                if (newPatches[i][target].getSoilQuality() == 0.0) {
+                    newPatches[i][target].setSoilQuality(0.0);
+                } else {
+                    newPatches[i][target].setSoilQuality(newPatches[i][target].getSoilQuality() + soilQualityDiff);
+                }
                 break;
             case DOWN:
                 target = j == size - 1 ? 0 : j + 1;
-                diff = (source.getTemp() - patches[i][target].getTemp()) / 2;
+                diff = (source.getTemp() - patches[i][target].getTemp()) * Params.DIFFUSION_RATE;
+                // calculation of soil quality difference
+                soilQualityDiff = (source.getSoilQuality() - patches[i][target].getTemp()) * Params.DIFFUSION_RATE;
                 newPatches[i][target].setTemp(newPatches[i][target].getTemp() + diff);
+                // set new patch soil quality
+                if (newPatches[i][target].getSoilQuality() == 0.0) {
+                    newPatches[i][target].setSoilQuality(0.0);
+                } else {
+                    newPatches[i][target].setSoilQuality(newPatches[i][target].getSoilQuality() + soilQualityDiff);
+                }
                 break;
             case LEFT:
                 target = i == 0 ? size - 1 : i - 1;
-                diff = (source.getTemp() - patches[target][j].getTemp()) / 2;
+                diff = (source.getTemp() - patches[target][j].getTemp()) * Params.DIFFUSION_RATE;
+                // calculation of soil quality difference
+                soilQualityDiff = (source.getSoilQuality() - patches[target][i].getTemp()) * Params.DIFFUSION_RATE;
                 newPatches[target][j].setTemp(newPatches[target][j].getTemp() + diff);
+                // set new patch soil quality
+                if (newPatches[target][i].getSoilQuality() == 0.0) {
+                    newPatches[target][i].setSoilQuality(0.0);
+                } else {
+                    newPatches[target][i].setSoilQuality(newPatches[target][i].getSoilQuality() + soilQualityDiff);
+                }
                 break;
             case RIGHT:
                 target = i == size - 1 ? 0 : i + 1;
-                diff = (source.getTemp() - patches[target][j].getTemp()) / 2;
+                diff = (source.getTemp() - patches[target][j].getTemp()) * Params.DIFFUSION_RATE;
+                // calculation of soil quality difference
+                soilQualityDiff = (source.getSoilQuality() - patches[target][i].getTemp()) * Params.DIFFUSION_RATE;
                 newPatches[target][j].setTemp(newPatches[target][j].getTemp() + diff);
+                // set new patch soil quality
+                if (newPatches[target][i].getSoilQuality() == 0.0) {
+                    newPatches[target][i].setSoilQuality(0.0);
+                } else {
+                    newPatches[target][i].setSoilQuality(newPatches[target][i].getSoilQuality() + soilQualityDiff);
+                }
                 break;
             default:
                 break;
@@ -221,12 +268,14 @@ public class World {
     public void display() {
         double[][] tempMap = new double[size][size];
         String[][] daisyMap = new String[size][size];
+        double[][] soilQualityMap = new double[size][size]; // the variable for the extension experiment
 
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 Patch cur = patches[i][j];
                 tempMap[i][j] = cur.getTemp();
                 daisyMap[i][j] = cur.getDaisy().toString();
+                soilQualityMap[i][j] = cur.getSoilQuality();
             }
         }
         System.out.println(" Temperature map : \n");
@@ -242,6 +291,16 @@ public class World {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 System.out.print(daisyMap[i][j]);
+                System.out.print('\t');
+            }
+            System.out.println('\n');
+        }
+
+        // function for displaying the soil quality map
+        System.out.println(" Soil quality map : \n");
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                System.out.printf("%.2f", soilQualityMap[i][j]);
                 System.out.print('\t');
             }
             System.out.println('\n');
