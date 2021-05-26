@@ -48,7 +48,7 @@ public class Patch {
         double absorbedLuminosity = calcLuminosity();
         double localHeating = absorbedLuminosity > 0 ? Math.log(absorbedLuminosity) * 72 + 80 : 80;
 
-        return (temperature + localHeating) * Params.DIFFUSION_RATE;
+        return (temperature + localHeating) / 2;
     }
 
     private double calcLuminosity() {

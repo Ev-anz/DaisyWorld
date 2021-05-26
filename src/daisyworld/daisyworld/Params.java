@@ -33,11 +33,16 @@ public class Params {
 
     // The switch of the extension of soil quality, True = switch on, False = switch off.
 
-    public static final boolean QUALITY_SWITCH = true;
+    public static final boolean QUALITY_SWITCH = false;
 
     // The best value of quality of soil, the common value should fluctuate from 0 to this value.
     // The average quality of all the patches at the beginning should be 0.5.
 
     public static final int MAX_QUALITY = 1;
+
+    // The death line of the soil quality, should be a small value
+
+    public static final double DEATH_LINE = 0.02;
+
 
 }

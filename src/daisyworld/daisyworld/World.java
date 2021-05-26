@@ -245,7 +245,7 @@ public class World {
                 soilQualityDiff = (source.getSoilQuality() - patches[target][i].getTemp()) * Params.DIFFUSION_RATE;
                 newPatches[target][j].setTemp(newPatches[target][j].getTemp() + diff);
                 // set new patch soil quality
-                if (newPatches[target][i].getSoilQuality() == 0.0) {
+                if (newPatches[target][i].getSoilQuality() <= Params.DEATH_LINE) {
                     newPatches[target][i].setSoilQuality(0.0);
                 } else {
                     newPatches[target][i].setSoilQuality(newPatches[target][i].getSoilQuality() + soilQualityDiff);
@@ -326,6 +326,72 @@ public class World {
         } else {coords[1] = y;}
 
         return coords;
+    }
+
+    // The reference functions to get across the corner and calculate the temperature.
+    private static int wrap (int coordinate) {
+        if (coordinate < 0) {
+            return  Params.WORLD_SIZE - 1;
+        } else if (coordinate >= Params.WORLD_SIZE) {
+            return 0;
+        } else {
+            return coordinate;
+        }
+    }
+
+    /**
+     * calculate the diffused value of patch (x, y) to its neighbours, and add it to the delta grid
+     * @param patchValue    the patch value to be diffused
+     * @param gridDelta     an array to record the value change for every patches after diffusion
+     * @param x             x coordinate
+     * @param y             y coordinate
+     * @param diffusionRate diffusion rate
+     */
+    private static void calculateShares (double patchValue, double[][] gridDelta,
+                                         int x, int y, double diffusionRate) {
+        double deltaValue = diffusionRate * patchValue / 8;
+        gridDelta[wrap(x - 1)][wrap(y - 1)] += deltaValue;
+        gridDelta[wrap(x - 1)][wrap(y)] += deltaValue;
+        gridDelta[wrap(x - 1)][wrap(y + 1)] += deltaValue;
+        gridDelta[wrap(x)][wrap(y - 1)] += deltaValue;
+        gridDelta[wrap(x)][wrap(y + 1)] += deltaValue;
+        gridDelta[wrap(x + 1)][wrap(y - 1)] += deltaValue;
+        gridDelta[wrap(x + 1)][wrap(y)] += deltaValue;
+        gridDelta[wrap(x + 1)][wrap(y + 1)] += deltaValue;
+    }
+
+    /**
+     * add the temperature change from the delta grid to the remaining temperature in patches
+     * @param gridDelta     the temperature change of each patch
+     * @param grid          the grid of the world
+     * @param diffusionRate the diffusion rate of the temperature
+     */
+    private static void applyTemperatureShares (
+            double[][] gridDelta, Patch[][] grid, double diffusionRate
+    ) {
+        for (int i = 0; i < Params.WORLD_SIZE; i++) {
+            for (int j = 0; j < Params.WORLD_SIZE; j++) {
+                double newTemperature = grid[i][j].getTemp() * (1 - diffusionRate) + gridDelta[i][j];
+                grid[i][j].setTemp(newTemperature);
+            }
+        }
+    }
+
+    /**
+     * add the soil quality change from the delta grid to the remaining soil quality in patches
+     * @param gridDelta     the soil quality change of each patch
+     * @param grid          the grid of the world
+     * @param diffusionRate the diffusion rate of the soil quality
+     */
+    private static void applySoilQualityShares (
+        double[][] gridDelta, Patch[][] grid, double diffusionRate
+    ) {
+        for (int i = 0; i < Params.WORLD_SIZE; i++) {
+            for (int j = 0; j < Params.WORLD_SIZE; j++) {
+                double newSoilQuality = grid[i][j].getSoilQuality() * (1 - diffusionRate) + gridDelta[i][j];
+                grid[i][j].setSoilQuality(newSoilQuality);
+            }
+        }
     }
 
 }
