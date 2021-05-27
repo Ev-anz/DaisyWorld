@@ -66,6 +66,25 @@ public class Patch {
 
     public void setSoilQuality (double soilQuality) {this.soilQuality = soilQuality;}
 
+    /**
+     * In this function the soil quality would change according to the current quality and if there is
+     * daisy living on this patch. The basic idea is if sth is good, then it's easier to become better.
+     * Otherwise, if sth is bad, then it's easier to become worse, Which is the balance of echo system.
+     */
+    public void changeSoilQuality () {
+        double currentQuality = this.soilQuality;
+        double nonPerfectRate = 1 - this.soilQuality;
+        double decreasePossibility = Params.CHANGE_BASE * nonPerfectRate;
+        double increasePossibility = Params.CHANGE_BASE * currentQuality;
+        double newQuality;
+        if (this.hasDaisy() == false) {
+            newQuality = Math.max(0, currentQuality - decreasePossibility);
+        } else {
+            newQuality = Math.min(1, currentQuality + increasePossibility);
+        }
+        this.soilQuality = newQuality;
+    }
+
     public boolean hasDaisy() {return daisy.hasDaisy();}
     
     public Daisy getDaisy() {return daisy;}

@@ -18,6 +18,7 @@ public class Main {
                             "\t'G' for one tick of the world, " +
                             "\t'B' for bulk updates of current world, " +
                             "\t'P' for display of current world, " +
+                            "\t'X' for writing data to the files" +
                             "\t'E' for exiting the program. \n");
 
             String s = in.next();
@@ -33,6 +34,12 @@ public class Main {
                     System.out.println("Input execution ticks: ");
                     int times = in.nextInt();
                     world.bulkUpdate(times);
+                    break;
+                case 'X':
+                    ExportData data = new ExportData(world);
+                    data.writeTickData();
+                    data.writeTotalData();
+                    System.out.println("data has been written to files.");
                     break;
                 case 'E':
                     System.out.println("End signal received, exiting.");

@@ -44,5 +44,7 @@ public class Params {
 
     public static final double DEATH_LINE = 0.02;
 
+    //Change base, the change will dependent on product of base and current non-perfect degree.
+    public static final double CHANGE_BASE = 0.1;
 
 }
