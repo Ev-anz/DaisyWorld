@@ -162,7 +162,10 @@ public class World {
             // Probability check: only with temperature higher than 5 degree, 100% success at 22.5 degree
             // Extension possibility check: rnd * soil quality, if the extension switch is off,
             // then soil quality should be 1 and won't affect the result.
-            double rnd = (0.1457 * temperature - 0.0032 * temperature * temperature - 0.6443) * soilQuality;
+            double rnd = 0;
+            if (soilQuality != 0) {
+                rnd = (0.1457 * temperature - 0.0032 * temperature * temperature - 0.6443) * soilQuality;
+            }
 
             if (Math.random() < rnd) {
                 // grow new daisy with the same type
@@ -206,7 +209,7 @@ public class World {
                 soilQualityDiff = (source.getSoilQuality() - patches[i][target].getTemp()) * Params.DIFFUSION_RATE;
                 newPatches[i][target].setTemp(newPatches[i][target].getTemp() + diff);
                 // set new patch soil quality
-                if (newPatches[i][target].getSoilQuality() == 0.0) {
+                if (newPatches[i][target].getSoilQuality() <= Params.DEATH_LINE) {
                     newPatches[i][target].setSoilQuality(0.0);
                 } else {
                     newPatches[i][target].setSoilQuality(newPatches[i][target].getSoilQuality() + soilQualityDiff);
@@ -219,7 +222,7 @@ public class World {
                 soilQualityDiff = (source.getSoilQuality() - patches[i][target].getTemp()) * Params.DIFFUSION_RATE;
                 newPatches[i][target].setTemp(newPatches[i][target].getTemp() + diff);
                 // set new patch soil quality
-                if (newPatches[i][target].getSoilQuality() == 0.0) {
+                if (newPatches[i][target].getSoilQuality() <= Params.DEATH_LINE) {
                     newPatches[i][target].setSoilQuality(0.0);
                 } else {
                     newPatches[i][target].setSoilQuality(newPatches[i][target].getSoilQuality() + soilQualityDiff);
@@ -232,7 +235,7 @@ public class World {
                 soilQualityDiff = (source.getSoilQuality() - patches[target][i].getTemp()) * Params.DIFFUSION_RATE;
                 newPatches[target][j].setTemp(newPatches[target][j].getTemp() + diff);
                 // set new patch soil quality
-                if (newPatches[target][i].getSoilQuality() == 0.0) {
+                if (newPatches[target][i].getSoilQuality() <= Params.DEATH_LINE) {
                     newPatches[target][i].setSoilQuality(0.0);
                 } else {
                     newPatches[target][i].setSoilQuality(newPatches[target][i].getSoilQuality() + soilQualityDiff);
