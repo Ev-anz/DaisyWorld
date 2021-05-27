@@ -1,6 +1,6 @@
 package daisyworld;
 
-enum Types {None, White, Black};
+enum Types {None, White, Black}
 
 /**
  * @author Jesse Zhao
@@ -64,4 +64,6 @@ public class Daisy {
     }
 
     public Types getType() {return type;}
+
+    public int getAge() {return age;}
 }
