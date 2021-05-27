@@ -7,6 +7,7 @@ public class Patch {
     private double temperature;
     private Daisy daisy;
     private boolean justDied = false;
+    private double soilQuality; // the soil quality for the extension experiment
 
     public Patch() {
         double random = Math.random();
@@ -20,6 +21,12 @@ public class Patch {
         }
 
         temperature = 15 + 5 * Math.random();
+
+        if (Params.QUALITY_SWITCH == false) {
+            soilQuality = 1.0;
+        } else {
+            soilQuality = Params.MAX_QUALITY * Math.random();
+        }
     }
 
     public Patch(Daisy daisy) {
@@ -53,6 +60,11 @@ public class Patch {
     public void setTemp(double temperature) {
         this.temperature = temperature;
     }
+
+    // function for getting and setting the parameter of extension experiment
+    public double getSoilQuality () {return soilQuality;}
+
+    public void setSoilQuality (double soilQuality) {this.soilQuality = soilQuality;}
 
     public boolean hasDaisy() {return daisy.hasDaisy();}
     
