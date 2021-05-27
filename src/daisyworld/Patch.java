@@ -22,7 +22,7 @@ public class Patch {
 
         temperature = 15 + 5 * Math.random();
 
-        if (Params.QUALITY_SWITCH == false) {
+        if (!Params.QUALITY_SWITCH) {
             soilQuality = 1.0;
         } else {
             soilQuality = Params.MAX_QUALITY * Math.random();
@@ -31,13 +31,13 @@ public class Patch {
 
     public Patch(Daisy daisy) {
         this();
-        this.daisy = daisy;
+        this.daisy = new Daisy(daisy.getType(), daisy.getAge());
     }
 
     public Patch(Daisy daisy, double temperature) {
         this();
         this.temperature = temperature;
-        this.daisy = new Daisy(daisy.getType());
+        this.daisy = new Daisy(daisy.getType(), daisy.getAge());
     }
 
     /**
@@ -75,7 +75,7 @@ public class Patch {
         if (res == 1) {
             // the aged daisy has died due to exceeding max age
             justDied = true;
-        };
+        }
     }
 
     public void spawnDaisy(Daisy daisy) {
@@ -84,7 +84,7 @@ public class Patch {
 
     /**
      * update daisy of this patch; avoids shallow copy
-     * @param daisy
+     * @param daisy daisy set to this patch
      */
     public void setDaisy(Daisy daisy) {this.daisy = new Daisy(daisy.getType());}
 

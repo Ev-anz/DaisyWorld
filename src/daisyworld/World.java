@@ -8,7 +8,7 @@ import java.util.Random;
 public class World {
     private final int size;
     private Patch[][] patches;
-    enum Directions {UP, DOWN, LEFT, RIGHT};
+    enum Directions {UP, DOWN, LEFT, RIGHT}
 
     /*
     TODO: find usage for population statistics, average temperature, maybe in save results
@@ -81,6 +81,7 @@ public class World {
 
         // updates the new world patches
         updatePatch(newPatches);
+
         patches = newPatches;
 
         // TODO: save locally
@@ -179,17 +180,31 @@ public class World {
      * @param newPatches new patches state
      */
     private void diffuse(Patch[][] newPatches) {
+        double[][] gridDeltaTemp = new double [size][size], gridDeltaSoil = new double [size][size];
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                updateByDirection(newPatches, i, j, Directions.UP);
-                updateByDirection(newPatches, i, j, Directions.DOWN);
-                updateByDirection(newPatches, i, j, Directions.LEFT);
-                updateByDirection(newPatches, i, j, Directions.RIGHT);
+                gridDeltaTemp[i][j] = 0;
+                gridDeltaSoil[i][j] = 0;
             }
         }
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+//                updateByDirection(newPatches, i, j, Directions.UP);
+//                updateByDirection(newPatches, i, j, Directions.DOWN);
+//                updateByDirection(newPatches, i, j, Directions.LEFT);
+//                updateByDirection(newPatches, i, j, Directions.RIGHT);
+                double patchTemp = patches[i][j].getTemp();
+                double patchSoil = patches[i][j].getSoilQuality();
+                calculateShares(patchTemp, gridDeltaTemp, i, j, Params.DIFFUSION_RATE);
+                calculateShares(patchSoil, gridDeltaSoil, i, j, Params.DIFFUSION_RATE);
+            }
+        }
+        applyTemperatureShares(gridDeltaTemp, newPatches, Params.DIFFUSION_RATE);
+        applySoilQualityShares(gridDeltaSoil, newPatches, Params.DIFFUSION_RATE);
     }
 
     /**
+     * (degraded)
      * Update a single direction's temperature diffusion
      * @param newPatches new patches state
      * @param i coordinate
@@ -198,9 +213,9 @@ public class World {
      */
     private void updateByDirection(Patch[][] newPatches, int i, int j, Directions direction) {
         Patch source = patches[i][j];
-        int target = -1;
-        double diff = 0;
-        double soilQualityDiff = 0.0;
+        int target;
+        double diff;
+        double soilQualityDiff;
         switch (direction) {
             case UP:
                 target = j == 0 ? size - 1 : j - 1;
@@ -313,9 +328,9 @@ public class World {
     /**
      * Helper function, get pass corner cases
      * Positions at the edge will come across the border as connected
-     * @param x
-     * @param y
-     * @return
+     * @param x coordinate
+     * @param y coordinate
+     * @return coordinates across the border
      */
     private int[] getCoord(int x, int y) {
         int[] coords = new int[2];
