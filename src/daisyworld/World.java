@@ -1,5 +1,6 @@
 package daisyworld;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -9,7 +10,32 @@ public class World {
     private final int size;
     private Patch[][] patches;
     enum Directions {UP, DOWN, LEFT, RIGHT}
+    // variables for statistics
+    private ArrayList<Integer> tickWhiteDaisyPopulation = new ArrayList<Integer>();
+    private ArrayList<Integer> tickBlackDaisyPopulation = new ArrayList<Integer>();
+    private ArrayList<Integer> tickTotalDaisyPopulation = new ArrayList<Integer>();
+    private ArrayList<Double> tickAvgTemperature = new ArrayList<Double>();
+    private ArrayList<Double> tickSoilQuality = new ArrayList<Double>();
 
+    public ArrayList<Integer> getTickWhiteDaisyPopulation () {
+        return tickWhiteDaisyPopulation;
+    }
+
+    public ArrayList<Integer> getTickBlackDaisyPopulation () {
+        return tickBlackDaisyPopulation;
+    }
+
+    public ArrayList<Integer> getTickTotalDaisyPopulation () {
+        return tickTotalDaisyPopulation;
+    }
+
+    public ArrayList<Double> getTickAvgTemperature() {
+        return tickAvgTemperature;
+    }
+
+    public ArrayList<Double> getTickSoilQuality() {
+        return tickSoilQuality;
+    }
     /*
     TODO: find usage for population statistics, average temperature, maybe in save results
      */
@@ -39,10 +65,42 @@ public class World {
         double averageSolQuality = 0.0;
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                averageSolQuality += patches[i][j].getTemp();
+                averageSolQuality += patches[i][j].getSoilQuality();
             }
         }
         return averageSolQuality / (size * size);
+    }
+
+    /**
+     * get the number of black daisy
+     * @return the number of black daisy
+     */
+    public int getCountBlackDaisy () {
+        int countBlack = 0;
+        for (int i = 0; i < size; i++) {
+            for (int j = 0 ; j < size; j++) {
+                if (patches[i][j].getDaisy().getType() == Types.Black) {
+                    countBlack++;
+                }
+            }
+        }
+        return countBlack;
+    }
+
+    /**
+     * get the number of white daisy
+     * @return the number of white daisy
+     */
+    public int getCountWhiteDaisy () {
+        int countWhite = 0;
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (patches[i][j].getDaisy().getType() == Types.White) {
+                    countWhite++;
+                }
+            }
+        }
+        return countWhite;
     }
 
     // TODO: Scenario where luminosity ramps up and down
@@ -79,6 +137,13 @@ public class World {
             }
         }
 
+        // updates the tick statistics
+        tickAvgTemperature.add(getAvgTemps());
+        tickBlackDaisyPopulation.add(getCountBlackDaisy());
+        tickWhiteDaisyPopulation.add(getCountWhiteDaisy());
+        tickTotalDaisyPopulation.add(getCountDaisy());
+        tickSoilQuality.add(getAvgSoilQuality());
+
         // updates the new world patches
         updatePatch(newPatches);
 
@@ -92,16 +157,18 @@ public class World {
      * @param newPatches new patches state
      */
     private void updatePatch(Patch[][] newPatches) {
+        // diffuse temperature
+        diffuse(newPatches);
 
-        // calculate new temperature by local-heating
+        // calculate new temperature by local-heating and set the quality changing if the soil parameter is used
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 newPatches[i][j].setTemp(newPatches[i][j].calcTemp());
+                if (Params.QUALITY_SWITCH == true) {
+                    newPatches[i][j].changeSoilQuality();
+                }
             }
         }
-
-        // diffuse temperature
-        diffuse(newPatches);
 
         // spawn/aged daisy
         for (int i = 0; i < size; i++) {
