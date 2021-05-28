@@ -103,4 +103,6 @@ public class Daisy {
     public Types getType() {return type;}
 
     public int getAge() {return age;}
+
+    public void setAge () {this.age = (int)(Math.random() * Params.MAX_AGE);}
 }
