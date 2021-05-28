@@ -1,6 +1,7 @@
 package daisyworld;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -13,6 +14,22 @@ public class World {
     private Patch[][] patches;
     // ticks elapsed in the world
     private int ticksElapsed = 0;
+
+    class Coords{
+        int x;
+        int y;
+
+        Coords(){}
+
+        Coords(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        int getX() {return x;}
+
+        int getY() {return y;}
+    }
 
     // variables for statistics
     private final ArrayList<Integer> tickWhiteDaisyPopulation = new ArrayList<Integer>();
@@ -180,7 +197,7 @@ public class World {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 newPatches[i][j].setTemp(newPatches[i][j].calcTemp());
-                if (Params.QUALITY_SWITCH == true) {
+                if (Params.QUALITY_SWITCH) {
                     newPatches[i][j].changeSoilQuality();
                 }
             }
@@ -210,24 +227,53 @@ public class World {
     }
 
     /**
-     * get 4 direction's coords, try to grow new daisy
+     * try to grow new daisy on one of the empty neighbor patches in 4 directions
      * use getCoord() to avoid corner cases
      * @param newPatches new patches state
      * @param i coordinate
      * @param j coordinate
      */
     private void sproutDaisy(Patch[][] newPatches, int i, int j) {
-        int[] upCoords = getCoord(i, j - 1);
-        int[] downCoords = getCoord(i, j + 1);
-        int[] leftCoords = getCoord(i - 1, j);
-        int[] rightCoords = getCoord(i, j + 1);
-        /**
-         * check if new daisy can be grown at a certain coordinate
-         */
-        grow(newPatches, i, j, upCoords);
-        grow(newPatches, i, j, downCoords);
-        grow(newPatches, i, j, leftCoords);
-        grow(newPatches, i, j, rightCoords);
+//        int[] upCoords = getCoord(i, j - 1);
+//        int[] downCoords = getCoord(i, j + 1);
+//        int[] leftCoords = getCoord(i - 1, j);
+//        int[] rightCoords = getCoord(i, j + 1);
+//        /**
+//         * check if new daisy can be grown at a certain coordinate
+//         */
+//        grow(newPatches, i, j, upCoords);
+//        grow(newPatches, i, j, downCoords);
+//        grow(newPatches, i, j, leftCoords);
+//        grow(newPatches, i, j, rightCoords);
+        Daisy daisy = patches[i][j].getDaisy();
+        double rnd = 0;
+        double temperature = patches[i][j].getTemp(), soilQuality = patches[i][j].getSoilQuality();
+        if (daisy.hasDaisy() && patches[i][j].getSoilQuality() != 0) {
+            rnd  = (0.1457 * temperature - 0.0032 * temperature * temperature - 0.6443) * soilQuality;
+        }
+        if (Math.random() < rnd) {
+            List<Coords> emptyPatches = new ArrayList<>();
+
+            if (!newPatches[wrap(i - 1)][j].hasDaisy()) {
+                emptyPatches.add(new Coords(wrap(i - 1), j));
+            }
+            if (!newPatches[wrap(i + 1)][j].hasDaisy()) {
+                emptyPatches.add(new Coords(wrap(i + 1), j));
+            }
+            if (!newPatches[i][wrap(j - 1)].hasDaisy()) {
+                emptyPatches.add(new Coords(i, wrap(j - 1)));
+            }
+            if (!newPatches[i][wrap(j + 1)].hasDaisy()) {
+                emptyPatches.add(new Coords(i, wrap(j + 1)));
+            }
+
+            if (emptyPatches.size() == 0) return;
+
+            Random random = new Random();
+            int index = random.nextInt(emptyPatches.size());
+            Coords result = emptyPatches.get(index);
+            newPatches[result.getX()][result.getY()].spawnDaisy(patches[i][j].getDaisy());
+        }
     }
 
     /**
