@@ -1,5 +1,10 @@
 package daisyworld;
 
+/**
+ * Note: we have 3 different types:
+ * Black, White and NONE. NONE refers to no daisy on the patch
+ * This is to simplify codes in patch.java and world.java
+ */
 enum Types {None, White, Black}
 
 /**
@@ -10,10 +15,17 @@ public class Daisy {
     private int age;
     private double albedo;
 
+    /**
+     * spawn a new daisy with type: none
+     */
     public Daisy(){
         this(Types.None);
     }
 
+    /**
+     * spawn a new daisy with given type
+     * @param type type given
+     */
     public Daisy(Types type){
         age = 0;
         this.type = type;
@@ -26,11 +38,20 @@ public class Daisy {
         }
     }
 
+    /**
+     * spawn a new daisy with given type and age
+     * @param type type given
+     * @param age age given
+     */
     public Daisy(Types type, int age){
         this(type);
         this.age = age;
     }
 
+    /**
+     * increase current daisy age by 1, dies if exceeding max age
+     * @return 0 if age successfully, 1 if the daisy died
+     */
     public int age() {
         if (type != Types.None) {
             age++;
@@ -45,7 +66,11 @@ public class Daisy {
 
         return 0;
     }
-    
+
+    /**
+     * override for display
+     * @return string format of daisy
+     */
     @Override
     public String toString(){
         if (type == Types.None) {
@@ -57,12 +82,24 @@ public class Daisy {
         }
     }
 
+    /**
+     *
+     * @return albedo of current daisy
+     */
     public double getAlbedo(){return albedo;}
 
+    /**
+     *
+     * @return boolean if current daisy is an actual daisy instance
+     */
     public boolean hasDaisy(){
         return type != Types.None;
     }
 
+    /**
+     * getters
+     * @return properties
+     */
     public Types getType() {return type;}
 
     public int getAge() {return age;}

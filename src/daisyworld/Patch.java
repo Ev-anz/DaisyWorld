@@ -6,12 +6,15 @@ package daisyworld;
 public class Patch {
     private double temperature;
     private Daisy daisy;
+    // if the daisy of this patch died this tick; block the spawning of new daisy
     private boolean justDied = false;
-    private double soilQuality; // the soil quality for the extension experiment
+    // the soil quality for the extension experiment
+    private double soilQuality;
 
     public Patch() {
         double random = Math.random();
 
+        // initialize daisy status
         if (random < Params.START_PERCENT_BLACK) {
             daisy = new Daisy(Types.Black);
         } else if (random > 1 - Params.START_PERCENT_WHITES) {
@@ -20,8 +23,10 @@ public class Patch {
             daisy = new Daisy(Types.None);
         }
 
+        // initialize random temperature
         temperature = 15 + 5 * Math.random();
 
+        // only change soil quality if the switch is turned on
         if (!Params.QUALITY_SWITCH) {
             soilQuality = 1.0;
         } else {
@@ -29,15 +34,25 @@ public class Patch {
         }
     }
 
+    // generate a new patch with the same daisy stats
     public Patch(Daisy daisy) {
         this();
         this.daisy = new Daisy(daisy.getType(), daisy.getAge());
     }
 
+    // generate a new patch with the same daisy and temperature stats
     public Patch(Daisy daisy, double temperature) {
         this();
         this.temperature = temperature;
         this.daisy = new Daisy(daisy.getType(), daisy.getAge());
+    }
+
+    // generate a new patch with the same daisy and temperature stats
+    public Patch(Daisy daisy, double temperature, double soilQuality) {
+        this();
+        this.temperature = temperature;
+        this.daisy = new Daisy(daisy.getType(), daisy.getAge());
+        this.soilQuality = soilQuality;
     }
 
     /**
@@ -51,19 +66,38 @@ public class Patch {
         return (temperature + localHeating) / 2;
     }
 
+    /**
+     * calculate luminosity according to albedo and solar luminosity
+     * @return patch luminosity
+     */
     private double calcLuminosity() {
         return (1 - daisy.getAlbedo()) * Params.SOLAR_LUMINOSITY;
     }
-    
+
+    /**
+     *
+     * @return current temperature
+     */
     public double getTemp() {return temperature;}
 
+    /**
+     * set current temperature
+     * @param temperature temperature to be set
+     */
     public void setTemp(double temperature) {
         this.temperature = temperature;
     }
 
-    // function for getting and setting the parameter of extension experiment
+    /**
+     *
+     * @return current soil quality
+     */
     public double getSoilQuality () {return soilQuality;}
 
+    /**
+     * set current soil qualitu
+     * @param soilQuality soil quaity to be set
+     */
     public void setSoilQuality (double soilQuality) {this.soilQuality = soilQuality;}
 
     /**
@@ -77,7 +111,9 @@ public class Patch {
         double decreasePossibility = Params.CHANGE_BASE * nonPerfectRate;
         double increasePossibility = Params.CHANGE_BASE * currentQuality;
         double newQuality;
-        if (this.hasDaisy() == false) {
+        // if there is no daisy on the patch, decrease the soil quality
+        // else increase the soil quality
+        if (!this.hasDaisy()) {
             newQuality = Math.max(0, currentQuality - decreasePossibility);
         } else {
             newQuality = Math.min(1, currentQuality + increasePossibility);
@@ -85,10 +121,22 @@ public class Patch {
         this.soilQuality = newQuality;
     }
 
+    /**
+     * getter functions for daisy
+     */
     public boolean hasDaisy() {return daisy.hasDaisy();}
     
     public Daisy getDaisy() {return daisy;}
 
+    /**
+     * update daisy of this patch; avoids shallow copy
+     * @param daisy daisy set to this patch
+     */
+    public void setDaisy(Daisy daisy) {this.daisy = new Daisy(daisy.getType());}
+
+    /**
+     * increase daisy age; daisy dies when exceeding max age
+     */
     public void agedDaisy() {
         int res = daisy.age();
         if (res == 1) {
@@ -97,20 +145,25 @@ public class Patch {
         }
     }
 
+    /**
+     * spawn new daisy on the patch
+     * @param daisy daisy stats
+     */
     public void spawnDaisy(Daisy daisy) {
         setDaisy(daisy);
     }
 
     /**
-     * update daisy of this patch; avoids shallow copy
-     * @param daisy daisy set to this patch
+     *
+     * @return justDied status of current patch
      */
-    public void setDaisy(Daisy daisy) {this.daisy = new Daisy(daisy.getType());}
-
     public boolean justDied() {
         return justDied;
     }
 
+    /**
+     * clear justDied status of current patch
+     */
     public void clearJustDied() {
         justDied = false;
     }
