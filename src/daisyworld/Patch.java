@@ -17,8 +17,10 @@ public class Patch {
         // initialize daisy status
         if (random < Params.START_PERCENT_BLACK) {
             daisy = new Daisy(Types.Black);
+            daisy.setAge();
         } else if (random > 1 - Params.START_PERCENT_WHITES) {
             daisy = new Daisy(Types.White);
+            daisy.setAge();
         } else {
             daisy = new Daisy(Types.None);
         }
