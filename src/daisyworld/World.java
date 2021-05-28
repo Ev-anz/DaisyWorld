@@ -15,11 +15,9 @@ public class World {
     // ticks elapsed in the world
     private int ticksElapsed = 0;
 
-    class Coords{
+    static class Coords{
         int x;
         int y;
-
-        Coords(){}
 
         Coords(int x, int y) {
             this.x = x;
@@ -158,11 +156,9 @@ public class World {
     public void update() {
         Patch[][] newPatches = new Patch[size][size];
 
-        /**
-         * Initialize a new world patches for the next tick.
-         * Note that simply using '=' will cause known bugs;
-         * This is due to the shallow copy property of java.
-         */
+         // Initialize a new world patches for the next tick.
+         // Note that simply using '=' will cause known bugs;
+         // This is due to the shallow copy property of java.
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 newPatches[i][j] = new Patch(patches[i][j].getDaisy(),
@@ -191,7 +187,6 @@ public class World {
      */
     private void updatePatch(Patch[][] newPatches) {
         // diffuse temperature
-        diffuse(newPatches);
 
         // calculate new temperature by local-heating and set the quality changing if the soil parameter is used
         for (int i = 0; i < size; i++) {
@@ -203,6 +198,8 @@ public class World {
             }
         }
 
+        diffuse(newPatches);
+
         // spawn/aged daisy
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
@@ -212,13 +209,12 @@ public class World {
                 }
             }
         }
-        /**
-         * Clear just died signal;
-         * When a daisy died at one tick,
-         * other daisies should not be able to spawn a new daisy at
-         * the same position at the same tick;
-         * Therefore we create a counter to signal the daisy just died in this tick.
-         */
+
+         // Clear just died signal;
+         // When a daisy died at one tick,
+         // other daisies should not be able to spawn a new daisy at
+         // the same position at the same tick;
+         // Therefore we create a counter to signal the daisy just died in this tick
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 newPatches[i][j].clearJustDied();
@@ -234,17 +230,6 @@ public class World {
      * @param j coordinate
      */
     private void sproutDaisy(Patch[][] newPatches, int i, int j) {
-//        int[] upCoords = getCoord(i, j - 1);
-//        int[] downCoords = getCoord(i, j + 1);
-//        int[] leftCoords = getCoord(i - 1, j);
-//        int[] rightCoords = getCoord(i, j + 1);
-//        /**
-//         * check if new daisy can be grown at a certain coordinate
-//         */
-//        grow(newPatches, i, j, upCoords);
-//        grow(newPatches, i, j, downCoords);
-//        grow(newPatches, i, j, leftCoords);
-//        grow(newPatches, i, j, rightCoords);
         Daisy daisy = patches[i][j].getDaisy();
         double rnd = 0;
         double temperature = patches[i][j].getTemp(), soilQuality = patches[i][j].getSoilQuality();
@@ -254,17 +239,29 @@ public class World {
         if (Math.random() < rnd) {
             List<Coords> emptyPatches = new ArrayList<>();
 
-            if (!newPatches[wrap(i - 1)][j].hasDaisy()) {
+            if (!newPatches[wrap(i - 1)][wrap(j - 1)].hasDaisy()) {
                 emptyPatches.add(new Coords(wrap(i - 1), j));
             }
-            if (!newPatches[wrap(i + 1)][j].hasDaisy()) {
+            if (!newPatches[wrap(i - 1)][wrap(j)].hasDaisy()) {
+                emptyPatches.add(new Coords(wrap(i - 1), j));
+            }
+            if (!newPatches[wrap(i - 1)][wrap(j + 1)].hasDaisy()) {
                 emptyPatches.add(new Coords(wrap(i + 1), j));
             }
-            if (!newPatches[i][wrap(j - 1)].hasDaisy()) {
+            if (!newPatches[wrap(i)][wrap(j - 1)].hasDaisy()) {
                 emptyPatches.add(new Coords(i, wrap(j - 1)));
             }
-            if (!newPatches[i][wrap(j + 1)].hasDaisy()) {
+            if (!newPatches[wrap(i)][wrap(j + 1)].hasDaisy()) {
                 emptyPatches.add(new Coords(i, wrap(j + 1)));
+            }
+            if (!newPatches[wrap(i + 1)][wrap(j - 1)].hasDaisy()) {
+                emptyPatches.add(new Coords(wrap(i - 1), j));
+            }
+            if (!newPatches[wrap(i + 1)][wrap(j)].hasDaisy()) {
+                emptyPatches.add(new Coords(wrap(i - 1), j));
+            }
+            if (!newPatches[wrap(i + 1)][wrap(j + 1)].hasDaisy()) {
+                emptyPatches.add(new Coords(wrap(i - 1), j));
             }
 
             if (emptyPatches.size() == 0) return;
@@ -320,34 +317,14 @@ public class World {
             for (int j = 0; j < size; j++) {
                 double patchTemp = patches[i][j].getTemp();
                 double patchSoil = patches[i][j].getSoilQuality();
-                calculateShares(patchTemp, gridDeltaTemp, i, j, Params.DIFFUSION_RATE);
-                calculateShares(patchSoil, gridDeltaSoil, i, j, Params.DIFFUSION_RATE);
+                calculateShares(patchTemp, gridDeltaTemp, i, j);
+                calculateShares(patchSoil, gridDeltaSoil, i, j);
             }
         }
-        applyTemperatureShares(gridDeltaTemp, newPatches, Params.DIFFUSION_RATE);
-        applySoilQualityShares(gridDeltaSoil, newPatches, Params.DIFFUSION_RATE);
+        applyTemperatureShares(gridDeltaTemp, newPatches);
+        applySoilQualityShares(gridDeltaSoil, newPatches);
     }
 
-    /**
-     * Helper function, get pass corner cases
-     * Positions at the edge will come across the border as connected
-     * @param x coordinate
-     * @param y coordinate
-     * @return coordinates across the border
-     */
-    private int[] getCoord(int x, int y) {
-        int[] coords = new int[2];
-
-        if (x < 0 || x == size) {
-            coords[0] = x < 0 ? size - 1 : 0;
-        } else {coords[0] = x;}
-
-        if (y < 0 || y == size) {
-            coords[0] = y < 0 ? size - 1 : 0;
-        } else {coords[1] = y;}
-
-        return coords;
-    }
 
     // The reference functions to get across the corner and calculate the temperature.
     private static int wrap (int coordinate) {
@@ -366,11 +343,10 @@ public class World {
      * @param gridDelta     an array to record the value change for every patches after diffusion
      * @param x             x coordinate
      * @param y             y coordinate
-     * @param diffusionRate diffusion rate
      */
-    private static void calculateShares (double patchValue, double[][] gridDelta,
-                                         int x, int y, double diffusionRate) {
-        double deltaValue = diffusionRate * patchValue / 8;
+    private static void calculateShares(double patchValue, double[][] gridDelta,
+                                        int x, int y) {
+        double deltaValue = Params.DIFFUSION_RATE * patchValue / 8;
         gridDelta[wrap(x - 1)][wrap(y - 1)] += deltaValue;
         gridDelta[wrap(x - 1)][wrap(y)] += deltaValue;
         gridDelta[wrap(x - 1)][wrap(y + 1)] += deltaValue;
@@ -385,14 +361,13 @@ public class World {
      * add the temperature change from the delta grid to the remaining temperature in patches
      * @param gridDelta     the temperature change of each patch
      * @param grid          the grid of the world
-     * @param diffusionRate the diffusion rate of the temperature
      */
-    private static void applyTemperatureShares (
-            double[][] gridDelta, Patch[][] grid, double diffusionRate
+    private static void applyTemperatureShares(
+            double[][] gridDelta, Patch[][] grid
     ) {
         for (int i = 0; i < Params.WORLD_SIZE; i++) {
             for (int j = 0; j < Params.WORLD_SIZE; j++) {
-                double newTemperature = grid[i][j].getTemp() * (1 - diffusionRate) + gridDelta[i][j];
+                double newTemperature = grid[i][j].getTemp() * (1 - Params.DIFFUSION_RATE) + gridDelta[i][j];
                 grid[i][j].setTemp(newTemperature);
             }
         }
@@ -402,14 +377,13 @@ public class World {
      * add the soil quality change from the delta grid to the remaining soil quality in patches
      * @param gridDelta     the soil quality change of each patch
      * @param grid          the grid of the world
-     * @param diffusionRate the diffusion rate of the soil quality
      */
-    private static void applySoilQualityShares (
-        double[][] gridDelta, Patch[][] grid, double diffusionRate
+    private static void applySoilQualityShares(
+            double[][] gridDelta, Patch[][] grid
     ) {
         for (int i = 0; i < Params.WORLD_SIZE; i++) {
             for (int j = 0; j < Params.WORLD_SIZE; j++) {
-                double newSoilQuality = grid[i][j].getSoilQuality() * (1 - diffusionRate) + gridDelta[i][j];
+                double newSoilQuality = grid[i][j].getSoilQuality() * (1 - Params.DIFFUSION_RATE) + gridDelta[i][j];
                 grid[i][j].setSoilQuality(newSoilQuality);
             }
         }
@@ -417,7 +391,7 @@ public class World {
 
     /**
      * simulate multiple updates
-     * @param times
+     * @param times updates
      */
     public void bulkUpdate(int times) {
         while(times > 0) {
